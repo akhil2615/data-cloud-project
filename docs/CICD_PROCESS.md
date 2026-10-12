@@ -4,25 +4,24 @@ This is the process for building Data Cloud (Data 360) configuration in the sand
 
 Share this file with the team. The repository around it is the automation: folder layout, kit matrix, scripts, and GitHub Actions.
 
-## How this matches the deployment diagram
+## The two orgs
 
-The diagram has two homes and one promotion path between them.
-
-| Diagram | This repository |
+| Org | What happens there |
 |---|---|
-| Development / Home Dev, fed by Org 1 CRM, Org 2 OCRM, Org 3 MBCRM | DC1 sandbox. Those three orgs are source systems connected to Home Dev. They are not Data Cloud orgs and they are not Git branches. |
-| Data Kit creation for the required deployment | A fresh DevOps kit is created in the Data Kit UI for one data space and one layer. |
-| Extract the manifest file locally | Download the manifest, then `scripts/retrieve-kit.sh` retrieves it into `data-cloud/<space>/<kit>/`. |
-| Commit to Git feature/dev/qa branch | `feature/<space>-<kit>-<description>` |
-| Pull request to the release branch | Pull request into `release` |
-| Review and four-eyes principle | Two approving reviews. Branch protection on `release` must require 2 approvals. |
-| Merge with the release branch | Merge. The `deploy-test` workflow starts. |
-| Push the manifest to the test sandbox and deploy | `deploy-test.yml` deploys the changed kits to DC1 sandbox, in that space's layer order. |
-| Post deployment steps | Publish identity resolution, activate prediction jobs, publish parent segments, recreate external activation targets, and wait until components are active. |
-| Home Prod, fed by the prod CRM / OCRM / MBCRM orgs | DC1 prod. Connectors there must use the same API names as the sandbox. |
-| Core deployment process | `deploy-prod.yml`, started manually from the release branch after the post-deploy checks pass. `main` is updated only after prod is confirmed. |
+| DC1 sandbox | Kits are created, retrieved, reviewed, and then deployed again as a test. |
+| DC1 prod | The same reviewed files are deployed after the sandbox checks pass. |
 
-Two Data Cloud orgs exist today: DC1 sandbox and DC1 prod. In the diagram, Home Dev and the test-sandbox deploy are both DC1 sandbox. Home Prod is DC1 prod. The test deploy still matters: it deploys the retrieved manifest and proves the package, the cleanup, and the layer order. It does not prove a brand-new org, because the kit was created in that same sandbox.
+CRM, OCRM, MBCRM, Marketing Cloud, Databricks, and SFTP are source connections. They must already exist in the target org and use the same API names as the sandbox. They are not Git branches.
+
+A fresh DevOps kit is created in the Data Kit UI for one data space and one layer. Download its manifest, then `scripts/retrieve-kit.sh` puts the files in `data-cloud/<space>/<kit>/`.
+
+Two people approve the pull request into `release`. The merge starts `deploy-test.yml`, which deploys the changed kits to DC1 sandbox in that space's layer order.
+
+After that, publish identity resolution, activate prediction jobs, publish parent segments, and recreate external activation targets where the space needs them. Wait until the components are active.
+
+`deploy-prod.yml` is started by hand from `release` after those checks. `main` is updated only after production is confirmed.
+
+The sandbox test deploys the retrieved files and checks the cleanup and the layer order. It is the same org where the kit was created, so it does not prove a brand-new empty org.
 
 ## What moves, and what does not
 
@@ -99,14 +98,14 @@ Shared components are copied into each kit folder that contains them. That is in
 
 | Branch | Role |
 |---|---|
-| `feature/<space>-<kit>-<description>` | Retrieve, cleanup, and the pull request. This is the feature/dev/qa branch on the diagram. |
+| `feature/<space>-<kit>-<description>` | The working copy for one kit: retrieve, cleanup, and the pull request. |
 | `release` | Reviewed kits. A merge deploys to the test sandbox. |
-| `main` | What DC1 prod last received. Updated only after the core deployment is confirmed. |
+| `main` | What DC1 prod last received. Updated only after the production deployment is confirmed. |
 | `hotfix/*` | Cut from `main`, then merged back to `release` and `main`. |
 
 No permanent branch per data space. While nothing is in flight, the repository has `main` and `release`.
 
-Four eyes means two people approve the pull request into `release`. GitHub cannot store that rule inside the repo files. After the repo is on GitHub, set branch protection on `release` and `main`:
+Two people approve the pull request into `release`. GitHub cannot store that rule inside the repo files. On GitHub, set branch protection on `release` and `main`:
 
 - pull request required
 - 2 approving reviews
