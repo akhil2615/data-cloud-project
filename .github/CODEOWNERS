@@ -1,0 +1,5 @@
+# Replace the team handle after this repository is on GitHub.
+# Branch protection should require this review on release and main.
+
+/data-kits/ @REPLACE_WITH_GITHUB_TEAM
+/.github/ @REPLACE_WITH_GITHUB_TEAM

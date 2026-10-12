@@ -1,0 +1,15 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true
+    },
+    {
+      "path": "data-cloud",
+      "default": false
+    }
+  ],
+  "name": "data-cloud-project",
+  "sourceApiVersion": "68.0",
+  "sfdcLoginUrl": "https://test.salesforce.com"
+}

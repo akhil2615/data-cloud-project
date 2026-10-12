@@ -1,0 +1,7 @@
+{
+  "name": "REPLACE_Meta_CAPI",
+  "platformType": "MetaCapi",
+  "connector": {
+    "accessToken": "${META_CAPI_ACCESS_TOKEN}"
+  }
+}

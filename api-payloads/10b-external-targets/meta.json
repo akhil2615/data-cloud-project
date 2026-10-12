@@ -1,0 +1,7 @@
+{
+  "name": "REPLACE_Meta",
+  "platformType": "Meta",
+  "connector": {
+    "accessToken": "${META_ACCESS_TOKEN}"
+  }
+}

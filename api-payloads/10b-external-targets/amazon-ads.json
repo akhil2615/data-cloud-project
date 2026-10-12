@@ -1,0 +1,7 @@
+{
+  "name": "REPLACE_Amazon_Ads",
+  "platformType": "AmazonAds",
+  "connector": {
+    "accessToken": "${AMAZON_ADS_ACCESS_TOKEN}"
+  }
+}

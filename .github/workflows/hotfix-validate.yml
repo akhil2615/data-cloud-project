@@ -1,0 +1,34 @@
+name: Hotfix validate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Repository rules
+        run: python scripts/validate_repo.py
+      - name: Check-only against prod
+        env:
+          SF_AUTH_URL: ${{ secrets.SF_AUTH_URL }}
+        run: |
+          if [ -z "${SF_AUTH_URL}" ]; then
+            echo "::warning::Prod SF_AUTH_URL is not set. Check-only runs after the prod secret is added."
+            exit 0
+          fi
+          npm install --global @salesforce/cli
+          printf '%s' "${SF_AUTH_URL}" > "${RUNNER_TEMP}/auth.txt"
+          sf org login sfdx-url --sfdx-url-file "${RUNNER_TEMP}/auth.txt" --alias dc1-prod
+          rm -f "${RUNNER_TEMP}/auth.txt"
+          git fetch origin main
+          kits="$(bash scripts/changed-kits.sh origin/main)"
+          while IFS= read -r kit; do
+            [ -z "$kit" ] && continue
+            bash scripts/deploy-kit.sh "$kit" dc1-prod --validate
+          done <<< "$kits"

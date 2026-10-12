@@ -1,0 +1,7 @@
+{
+  "name": "REPLACE_DV360",
+  "platformType": "DV360",
+  "connector": {
+    "accessToken": "${DV360_ACCESS_TOKEN}"
+  }
+}

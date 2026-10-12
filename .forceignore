@@ -1,0 +1,9 @@
+node_modules/
+.sf/
+.sfdx/
+deployment-state/
+docs/
+scripts/
+api-payloads/
+data-kits/
+manifest/

@@ -1,0 +1,12 @@
+{
+  "name": "data-cloud-project",
+  "private": true,
+  "scripts": {
+    "validate": "python scripts/validate_repo.py",
+    "lint": "prettier --check ."
+  },
+  "devDependencies": {
+    "@prettier/plugin-xml": "^3.4.2",
+    "prettier": "^3.6.2"
+  }
+}

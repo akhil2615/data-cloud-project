@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PLACEHOLDER: replace this file with the manifest downloaded from the Data Kit UI. Do not hand-author members. -->
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <version>68.0</version>
+</Package>

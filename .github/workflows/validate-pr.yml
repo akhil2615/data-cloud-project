@@ -1,0 +1,67 @@
+name: Validate pull request
+
+on:
+  pull_request:
+    branches: [release, main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Repository rules
+        run: python scripts/validate_repo.py
+      - name: Install formatter
+        run: npm install
+      - name: Check formatting
+        run: npx prettier --check "docs/**/*.md" "data-kits/**/*.yaml" ".github/**/*.yml" "manifest/**/*.xml"
+      - name: Dependency check for changed kits
+        run: |
+          git fetch origin "${{ github.base_ref }}"
+          kits="$(bash scripts/changed-kits.sh "origin/${{ github.base_ref }}")"
+          if [ -z "$kits" ]; then
+            echo "No kit changes."
+            exit 0
+          fi
+          while IFS= read -r kit; do
+            python scripts/check-dependencies.py "$kit"
+          done <<< "$kits"
+
+  check-only:
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Salesforce CLI
+        run: npm install --global @salesforce/cli
+      - name: Check-only deploy of changed kits
+        env:
+          SF_AUTH_URL: ${{ secrets.SF_AUTH_URL }}
+        run: |
+          if [ -z "${SF_AUTH_URL}" ]; then
+            echo "::warning::SF_AUTH_URL is not set. Check-only deploy runs after the test sandbox secret is added."
+            exit 0
+          fi
+          printf '%s' "${SF_AUTH_URL}" > "${RUNNER_TEMP}/auth.txt"
+          sf org login sfdx-url --sfdx-url-file "${RUNNER_TEMP}/auth.txt" --alias dc1-sandbox
+          rm -f "${RUNNER_TEMP}/auth.txt"
+          git fetch origin "${{ github.base_ref }}"
+          kits="$(bash scripts/changed-kits.sh "origin/${{ github.base_ref }}")"
+          if [ -z "$kits" ]; then
+            exit 0
+          fi
+          while IFS= read -r kit; do
+            if ! bash scripts/deploy-kit.sh "$kit" dc1-sandbox --validate; then
+              echo "::warning::Check-only is not supported or failed for ${kit}. A reviewer must confirm this type."
+              exit 1
+            fi
+          done <<< "$kits"

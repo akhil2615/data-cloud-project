@@ -1,0 +1,7 @@
+{
+  "name": "REPLACE_Google_Ads",
+  "platformType": "GoogleAds",
+  "connector": {
+    "developerToken": "${GOOGLE_ADS_DEVELOPER_TOKEN}"
+  }
+}

@@ -1,0 +1,10 @@
+.sf/
+.sfdx/
+node_modules/
+*.env
+.env
+secrets/
+deployment-state/*.json
+data-kits/id-mappings/*.json
+*.log
+.DS_Store

@@ -1,0 +1,85 @@
+name: Deploy production
+
+on:
+  workflow_dispatch:
+    inputs:
+      space:
+        description: Data space key, for example germany
+        required: true
+        type: string
+      kit:
+        description: Optional single kit. Leave empty to run the space order.
+        required: false
+        type: string
+      dry_run:
+        description: Check-only. Does not install.
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  deploy:
+    if: startsWith(github.ref, 'refs/heads/release')
+    runs-on: ubuntu-latest
+    environment: prod
+    concurrency:
+      group: prod-deploy
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Salesforce CLI
+        run: npm install --global @salesforce/cli
+      - name: Authenticate
+        env:
+          SF_AUTH_URL: ${{ secrets.SF_AUTH_URL }}
+        run: |
+          printf '%s' "${SF_AUTH_URL}" > "${RUNNER_TEMP}/auth.txt"
+          sf org login sfdx-url --sfdx-url-file "${RUNNER_TEMP}/auth.txt" --alias dc1-prod
+          rm -f "${RUNNER_TEMP}/auth.txt"
+      - name: Deploy
+        env:
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          META_CAPI_ACCESS_TOKEN: ${{ secrets.META_CAPI_ACCESS_TOKEN }}
+          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
+          DV360_ACCESS_TOKEN: ${{ secrets.DV360_ACCESS_TOKEN }}
+          AMAZON_ADS_ACCESS_TOKEN: ${{ secrets.AMAZON_ADS_ACCESS_TOKEN }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            if [ -z "${{ inputs.kit }}" ]; then
+              echo "Dry run needs a kit name. A whole space is deployed only when dry_run is false."
+              exit 1
+            fi
+            bash scripts/deploy-kit.sh "${{ inputs.kit }}" dc1-prod --validate
+          elif [ -n "${{ inputs.kit }}" ]; then
+            bash scripts/deploy-kit.sh "${{ inputs.kit }}" dc1-prod
+          else
+            bash scripts/deploy-space.sh "${{ inputs.space }}" dc1-prod --resume
+          fi
+      - name: Compare sandbox and prod
+        if: inputs.dry_run == false
+        env:
+          SF_AUTH_URL_SANDBOX: ${{ secrets.SF_AUTH_URL_SANDBOX }}
+        run: |
+          printf '%s' "${SF_AUTH_URL_SANDBOX}" > "${RUNNER_TEMP}/sandbox.txt"
+          sf org login sfdx-url --sfdx-url-file "${RUNNER_TEMP}/sandbox.txt" --alias dc1-sandbox
+          rm -f "${RUNNER_TEMP}/sandbox.txt"
+          python scripts/validate-prod.py --space "${{ inputs.space }}" --sandbox dc1-sandbox --prod dc1-prod
+      - name: Update status and tag
+        if: inputs.dry_run == false
+        run: |
+          python scripts/update-space-status.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/space-status.md
+          git commit -m "Record prod deployment of ${{ inputs.space }}" || true
+          git push
+          git tag "prod-${{ inputs.space }}-$(date -u +%Y%m%d)"
+          git push --tags

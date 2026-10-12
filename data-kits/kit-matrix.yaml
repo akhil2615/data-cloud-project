@@ -1,0 +1,261 @@
+version: 1
+api_version: "68.0"
+layers_order:
+  - "01"
+  - "02"
+  - "02b"
+  - "03"
+  - "04"
+  - "05"
+  - "06"
+  - "07"
+  - "08"
+  - "09"
+  - "10"
+  - "10c"
+  - "10b"
+  - "11"
+  - "12"
+gates:
+  02b: activate-prediction-jobs
+  04: publish-ir
+  07: publish-parent-segments
+  10b: create-external-activation-targets
+spaces:
+  default:
+    api_name: default
+    label: default
+    prefix: ""
+    inventory: seeded
+    order:
+      - "01"
+      - "02"
+      - "03"
+      - "04"
+      - "05"
+      - "07"
+      - "09"
+      - "10"
+    kits:
+      "01":
+        - kit: DK01_mbcrm_default_v1
+          version: 1
+          scope: mbcrm
+        - kit: DK01_sftp_default_v1
+          version: 1
+          scope: sftp
+      "05":
+        - kit: DK05_ci-standalone_default_v1
+          version: 1
+          scope: ci-standalone
+      "12": []
+  amg:
+    api_name: AMG
+    label: AMG
+    prefix: "AMG"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  australia:
+    api_name: Australia
+    label: Australia
+    prefix: "AUS"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  austria:
+    api_name: Austria
+    label: Austria
+    prefix: "AUT"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  belgium:
+    api_name: Belgium
+    label: Belgium
+    prefix: "BEL"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  brazil:
+    api_name: Brazil
+    label: Brazil
+    prefix: "BRA"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  czech-republic:
+    api_name: Czech_Republic
+    label: Czech Republic
+    prefix: "CZE"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  denmark:
+    api_name: Denmark
+    label: Denmark
+    prefix: "DNK"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  france:
+    api_name: France
+    label: France
+    prefix: "FRA"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  germany:
+    api_name: Germany
+    label: Germany
+    prefix: "DEU"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  hungary:
+    api_name: Hungary
+    label: Hungary
+    prefix: "HUN"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  india:
+    api_name: India
+    label: India
+    prefix: "IND"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  italy:
+    api_name: Italy
+    label: Italy
+    prefix: "ITA"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  japan:
+    api_name: Japan
+    label: Japan
+    prefix: "JPN"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  malaysia:
+    api_name: Malaysia
+    label: Malaysia
+    prefix: "MAL"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  mexico:
+    api_name: Mexico
+    label: Mexico
+    prefix: "MEX"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  netherlands:
+    api_name: Netherlands
+    label: Netherlands
+    prefix: "NLD"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  new-zealand:
+    api_name: New_Zealand
+    label: New Zealand
+    prefix: "NZL"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  poland:
+    api_name: Poland
+    label: Poland
+    prefix: "POL"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  portugal:
+    api_name: Portugal
+    label: Portugal
+    prefix: "PRT"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  romania:
+    api_name: Romania
+    label: Romania
+    prefix: "ROU"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  singapore:
+    api_name: Singapore
+    label: Singapore
+    prefix: "SGP"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  slovakia:
+    api_name: Slovakia
+    label: Slovakia
+    prefix: "SVK"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  south-africa:
+    api_name: South_Africa
+    label: South Africa
+    prefix: "ZAF"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  south-korea:
+    api_name: South_Korea
+    label: South Korea
+    prefix: "KOR"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  sweden:
+    api_name: Sweden
+    label: Sweden
+    prefix: "SWE"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  switzerland:
+    api_name: Switzerland
+    label: Switzerland
+    prefix: "CHE"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  thailand:
+    api_name: Thailand
+    label: Thailand
+    prefix: "THA"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  turkey:
+    api_name: Turkey
+    label: Turkey
+    prefix: "TUR"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  vietnam:
+    api_name: Vietnam
+    label: Vietnam
+    prefix: "VNM"
+    inventory: not-seeded
+    order: []
+    kits: {}
+  unassigned:
+    api_name: ""
+    label: UNASSIGNED
+    prefix: ""
+    inventory: awaiting-name
+    order: []
+    kits: {}

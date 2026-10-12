@@ -1,0 +1,59 @@
+name: Deploy test sandbox
+
+on:
+  push:
+    branches: [release]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: test
+    concurrency:
+      group: test-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Salesforce CLI
+        run: npm install --global @salesforce/cli
+      - name: Authenticate
+        env:
+          SF_AUTH_URL: ${{ secrets.SF_AUTH_URL }}
+        run: |
+          if [ -z "${SF_AUTH_URL}" ]; then
+            echo "SF_AUTH_URL is required in the test environment."
+            exit 1
+          fi
+          printf '%s' "${SF_AUTH_URL}" > "${RUNNER_TEMP}/auth.txt"
+          sf org login sfdx-url --sfdx-url-file "${RUNNER_TEMP}/auth.txt" --alias dc1-sandbox
+          rm -f "${RUNNER_TEMP}/auth.txt"
+      - name: Deploy changed kits
+        run: |
+          kits="$(bash scripts/changed-kits.sh HEAD~1)"
+          if [ -z "$kits" ]; then
+            echo "No kits in this merge."
+            exit 0
+          fi
+          while IFS= read -r kit; do
+            bash scripts/deploy-kit.sh "$kit" dc1-sandbox
+            bash scripts/wait-for-active.sh "$kit" dc1-sandbox
+          done <<< "$kits"
+      - name: Notify Slack
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "${SLACK_WEBHOOK_URL}" ]; then
+            echo "SLACK_WEBHOOK_URL is not set."
+            exit 0
+          fi
+          curl -sS -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"Test sandbox deploy for ${GITHUB_SHA}: ${JOB_STATUS}\"}" \
+            "${SLACK_WEBHOOK_URL}"
