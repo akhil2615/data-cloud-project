@@ -1,4 +1,4 @@
-name: Deploy test sandbox
+name: Deploy deployment sandbox
 
 on:
   push:
@@ -7,9 +7,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: test
+    environment: deployment
     concurrency:
-      group: test-deploy
+      group: deployment-sandbox
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
@@ -28,11 +28,11 @@ jobs:
           SF_AUTH_URL: ${{ secrets.SF_AUTH_URL }}
         run: |
           if [ -z "${SF_AUTH_URL}" ]; then
-            echo "SF_AUTH_URL is required in the test environment."
+            echo "SF_AUTH_URL is required in the deployment environment."
             exit 1
           fi
           printf '%s' "${SF_AUTH_URL}" > "${RUNNER_TEMP}/auth.txt"
-          sf org login sfdx-url --sfdx-url-file "${RUNNER_TEMP}/auth.txt" --alias dc1-sandbox
+          sf org login sfdx-url --sfdx-url-file "${RUNNER_TEMP}/auth.txt" --alias dc1-deploy
           rm -f "${RUNNER_TEMP}/auth.txt"
       - name: Deploy changed kits
         run: |
@@ -42,8 +42,8 @@ jobs:
             exit 0
           fi
           while IFS= read -r kit; do
-            bash scripts/deploy-kit.sh "$kit" dc1-sandbox
-            bash scripts/wait-for-active.sh "$kit" dc1-sandbox
+            bash scripts/deploy-kit.sh "$kit" dc1-deploy
+            bash scripts/wait-for-active.sh "$kit" dc1-deploy
           done <<< "$kits"
       - name: Notify Slack
         if: always()
@@ -55,5 +55,5 @@ jobs:
             exit 0
           fi
           curl -sS -X POST -H 'Content-type: application/json' \
-            --data "{\"text\":\"Test sandbox deploy for ${GITHUB_SHA}: ${JOB_STATUS}\"}" \
+            --data "{\"text\":\"Deployment sandbox deploy for ${GITHUB_SHA}: ${JOB_STATUS}\"}" \
             "${SLACK_WEBHOOK_URL}"

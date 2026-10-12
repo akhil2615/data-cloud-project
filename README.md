@@ -1,25 +1,30 @@
 # Data Cloud sandbox to production
 
-This repository is the shared record of what we build in the DC1 sandbox and
-promote to DC1 production.
+This repository is the shared record of what we build in the build sandbox,
+test in the deployment sandbox, and promote to production.
 
 You do not need to be a Git expert to use it. The process is:
 
 ```text
-Build a fresh kit in the sandbox
+Build a fresh kit in the build sandbox
         ↓
 Download its manifest and retrieve its files
         ↓
 Save the files in Git and ask two people to review them
         ↓
-Deploy the approved files to the test sandbox
+Deploy the approved files to the deployment sandbox
         ↓
 Complete the required publish/activation checks
         ↓
-Deploy to production
+Deploy the same files to production
         ↓
 Record the successful deployment in Git
 ```
+
+The build sandbox and the deployment sandbox are different orgs. The kit is
+created in the first one. The deployment sandbox is the real install test,
+because that org did not create the kit. Production receives the files only
+after that test succeeds.
 
 ## The Git words used here
 
@@ -156,7 +161,7 @@ under `data-cloud/` and are deployed separately with Salesforce CLI.
 
 ## One kit from sandbox to production
 
-1. In DC1 sandbox, create a **fresh DevOps Data Kit**, for example
+1. In the build sandbox, create a **fresh DevOps Data Kit**, for example
    `DK04_ir_france_v1`.
 2. Add the data space and components.
 3. Run **View/Add Dependencies** and check the publish sequence.
@@ -164,7 +169,7 @@ under `data-cloud/` and are deployed separately with Salesforce CLI.
 5. Retrieve the kit:
 
    ```bash
-   scripts/retrieve-kit.sh DK04_ir_france_v1 dc1-sandbox
+   scripts/retrieve-kit.sh DK04_ir_france_v1 dc1-build
    ```
 
 6. Clean the retrieved files:
@@ -176,7 +181,7 @@ under `data-cloud/` and are deployed separately with Salesforce CLI.
 7. Save the changes on a working branch and open a pull request into
    `release`.
 8. Two teammates approve it. Merge the pull request.
-9. GitHub deploys the changed kit to the test sandbox.
+9. GitHub deploys the changed kit to the deployment sandbox.
 10. Complete any required gate, such as publishing identity resolution or
     publishing a parent segment.
 11. Start the production workflow for that space or kit. A production
@@ -197,13 +202,13 @@ we intend to deploy and lets two people review it.
 Working branch → pull request → release
 ```
 
-### After the test-sandbox deployment
+### After the deployment-sandbox deployment
 
 The deployment result and any completed gates are recorded in the deployment
 status. If a fix is required, make the fix in a new commit and review that
 change before trying again.
 
-Do not edit metadata directly in the test sandbox and leave Git unchanged.
+Do not edit metadata directly in the deployment sandbox and leave Git unchanged.
 
 ### After the production deployment succeeds
 

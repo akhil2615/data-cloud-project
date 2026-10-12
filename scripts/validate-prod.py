@@ -1,6 +1,6 @@
 """Compare component counts between sandbox and prod for one data space.
 
-Usage: python scripts/validate-prod.py --space germany --sandbox dc1-sandbox --prod dc1-prod
+Usage: python scripts/validate-prod.py --space germany --sandbox dc1-deploy --prod dc1-prod
 
 Exits non-zero when a counted type differs. Queries that the org rejects are
 reported and also fail the run, so a silent skip cannot look like a match.

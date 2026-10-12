@@ -1,27 +1,28 @@
 # Data Cloud CI/CD process
 
-This is the process for building Data Cloud (Data 360) configuration in the sandbox, reviewing it in Git, deploying it to the test sandbox, and promoting it to production.
+This is the process for building Data Cloud (Data 360) configuration in the build sandbox, reviewing it in Git, installing it in the deployment sandbox, and promoting the same files to production.
 
 Share this file with the team. The repository around it is the automation: folder layout, kit matrix, scripts, and GitHub Actions.
 
-## The two orgs
+## The three orgs
 
-| Org | What happens there |
-|---|---|
-| DC1 sandbox | Kits are created, retrieved, reviewed, and then deployed again as a test. |
-| DC1 prod | The same reviewed files are deployed after the sandbox checks pass. |
+| Org | CLI alias | What happens there |
+|---|---|---|
+| Build sandbox | `dc1-build` | Kits are created here. The manifest is downloaded and the files are retrieved from here. |
+| Deployment sandbox | `dc1-deploy` | Approved files are installed here. This org did not create the kit, so this is the deployment test. |
+| Production | `dc1-prod` | The same files are deployed here only after the deployment sandbox succeeds. |
 
 CRM, OCRM, MBCRM, Marketing Cloud, Databricks, and SFTP are source connections. They must already exist in the target org and use the same API names as the sandbox. They are not Git branches.
 
 A fresh DevOps kit is created in the Data Kit UI for one data space and one layer. Download its manifest, then `scripts/retrieve-kit.sh` puts the files in `data-cloud/<space>/<kit>/`.
 
-Two people approve the pull request into `release`. The merge starts `deploy-test.yml`, which deploys the changed kits to DC1 sandbox in that space's layer order.
+Two people approve the pull request into `release`. The merge starts `deploy-test.yml`, which deploys the changed kits to the deployment sandbox in that space's layer order.
 
 After that, publish identity resolution, activate prediction jobs, publish parent segments, and recreate external activation targets where the space needs them. Wait until the components are active.
 
 `deploy-prod.yml` is started by hand from `release` after those checks. `main` is updated only after production is confirmed.
 
-The sandbox test deploys the retrieved files and checks the cleanup and the layer order. It is the same org where the kit was created, so it does not prove a brand-new empty org.
+The deployment sandbox receives the retrieved files and checks the cleanup, the layer order, and the install. Production is next only after that install succeeds.
 
 ## What moves, and what does not
 
@@ -99,7 +100,7 @@ Shared components are copied into each kit folder that contains them. That is in
 | Branch | Role |
 |---|---|
 | `feature/<space>-<kit>-<description>` | The working copy for one kit: retrieve, cleanup, and the pull request. |
-| `release` | Reviewed kits. A merge deploys to the test sandbox. |
+| `release` | Reviewed kits. A merge deploys to the deployment sandbox. |
 | `main` | What DC1 prod last received. Updated only after the production deployment is confirmed. |
 | `hotfix/*` | Cut from `main`, then merged back to `release` and `main`. |
 
@@ -123,11 +124,11 @@ Two people approve the pull request into `release`. GitHub cannot store that rul
 - `cleanup-kit.sh` has no remaining `KQ_*` fields, empty CustomObject labels, or managed-package components
 - dependency check
 - package under 50 MB (52,428,800 bytes)
-- check-only deploy to the test sandbox when `SF_AUTH_URL` is configured and the metadata type supports `--dry-run`
+- check-only deploy to the deployment sandbox when `SF_AUTH_URL` is configured and the metadata type supports `--dry-run`
 
 The pull request does not install the kit.
 
-### 2. Merge to release: test sandbox
+### 2. Merge to release: deployment sandbox
 
 `deploy-test.yml` runs on a push to `release`.
 
@@ -179,13 +180,13 @@ After that job is green, merge `release` into `main`. `main` is the retrace poin
 
 ## One kit, from the UI to production
 
-1. In DC1 sandbox, create a fresh DevOps kit. Add the data space and the components. Run View/Add Dependencies. Check the publish sequence.
+1. In the build sandbox, create a fresh DevOps kit. Add the data space and the components. Run View/Add Dependencies. Check the publish sequence.
 2. Download the manifest into `manifest/kits/<kit>.xml`. Replace the placeholder file. Do not hand-write members.
-3. `scripts/retrieve-kit.sh <kit> dc1-sandbox`
+3. `scripts/retrieve-kit.sh <kit> dc1-build`
 4. `scripts/cleanup-kit.sh data-cloud/<space>/<kit>`
 5. Commit on `feature/<space>-<kit>-<description>` and open a pull request into `release`.
 6. Two reviewers approve. Merge.
-7. The test workflow deploys to DC1 sandbox. Complete any gate it stops on.
+7. The test workflow deploys to the deployment sandbox. Complete any gate it stops on.
 8. Start the prod workflow for that space. Approve the `prod` environment.
 9. Confirm the components in the prod UI. Merge `release` into `main`.
 
@@ -195,7 +196,7 @@ Rollback is a new forward deployment.
 
 1. Find the last good tag.
 2. Create a fresh kit version in the sandbox from that known state.
-3. Retrieve, review, deploy to the test sandbox, then deploy to prod.
+3. Retrieve from the build sandbox, review, deploy to the deployment sandbox, then deploy to prod.
 4. Do not assume an old XML file can be pushed over a kit that cached its version. Some components have no destructive undeploy.
 
 ## Local checks before you share the repo
@@ -207,11 +208,11 @@ python scripts/validate_repo.py
 python scripts/update-space-status.py
 ```
 
-Salesforce commands need an authenticated CLI alias (`dc1-sandbox`, `dc1-prod`). GitHub Actions reads `SF_AUTH_URL` from the `test` and `prod` environments. Do not commit auth files, keys, or connector passwords.
+Salesforce commands need three authenticated CLI aliases: `dc1-build`, `dc1-deploy`, and `dc1-prod`. GitHub Actions reads `SF_AUTH_URL` from the `deployment` environment for the deployment sandbox, and from the `prod` environment for production. Do not commit auth files, keys, or connector passwords.
 
 ## What was verified, and what is still a pilot
 
-Verified against DC1 sandbox on 12 Oct 2026:
+Verified against the build sandbox on 12 Oct 2026:
 
 - Salesforce CLI `2.131.7`.
 - Org API version `68.0` (`sf org display`, and `/services/data` lists `68.0` as Latest Release). `sfdx-project.json` uses `68.0`.

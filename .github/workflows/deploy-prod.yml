@@ -69,9 +69,9 @@ jobs:
           SF_AUTH_URL_SANDBOX: ${{ secrets.SF_AUTH_URL_SANDBOX }}
         run: |
           printf '%s' "${SF_AUTH_URL_SANDBOX}" > "${RUNNER_TEMP}/sandbox.txt"
-          sf org login sfdx-url --sfdx-url-file "${RUNNER_TEMP}/sandbox.txt" --alias dc1-sandbox
+          sf org login sfdx-url --sfdx-url-file "${RUNNER_TEMP}/sandbox.txt" --alias dc1-deploy
           rm -f "${RUNNER_TEMP}/sandbox.txt"
-          python scripts/validate-prod.py --space "${{ inputs.space }}" --sandbox dc1-sandbox --prod dc1-prod
+          python scripts/validate-prod.py --space "${{ inputs.space }}" --sandbox dc1-deploy --prod dc1-prod
       - name: Update status and tag
         if: inputs.dry_run == false
         run: |

@@ -48,11 +48,11 @@ jobs:
           SF_AUTH_URL: ${{ secrets.SF_AUTH_URL }}
         run: |
           if [ -z "${SF_AUTH_URL}" ]; then
-            echo "::warning::SF_AUTH_URL is not set. Check-only deploy runs after the test sandbox secret is added."
+            echo "::warning::SF_AUTH_URL is not set. Check-only deploy runs after the deployment sandbox secret is added."
             exit 0
           fi
           printf '%s' "${SF_AUTH_URL}" > "${RUNNER_TEMP}/auth.txt"
-          sf org login sfdx-url --sfdx-url-file "${RUNNER_TEMP}/auth.txt" --alias dc1-sandbox
+          sf org login sfdx-url --sfdx-url-file "${RUNNER_TEMP}/auth.txt" --alias dc1-deploy
           rm -f "${RUNNER_TEMP}/auth.txt"
           git fetch origin "${{ github.base_ref }}"
           kits="$(bash scripts/changed-kits.sh "origin/${{ github.base_ref }}")"
@@ -60,7 +60,7 @@ jobs:
             exit 0
           fi
           while IFS= read -r kit; do
-            if ! bash scripts/deploy-kit.sh "$kit" dc1-sandbox --validate; then
+            if ! bash scripts/deploy-kit.sh "$kit" dc1-deploy --validate; then
               echo "::warning::Check-only is not supported or failed for ${kit}. A reviewer must confirm this type."
               exit 1
             fi
