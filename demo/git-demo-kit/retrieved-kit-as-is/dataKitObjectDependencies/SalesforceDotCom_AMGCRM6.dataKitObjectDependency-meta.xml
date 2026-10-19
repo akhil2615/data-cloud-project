@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataKitObjectDependency xmlns="http://soap.sforce.com/2006/04/metadata">
+    <dataPackageKitDef>GIT_Demo_Kit</dataPackageKitDef>
+    <developerName>SalesforceDotCom_AMGCRM6</developerName>
+    <masterLabel>Salesforce Connector Mercedes-AMG GmbH AMGCRM</masterLabel>
+    <sourceObject>Contact_AMGCRM_1792413266747</sourceObject>
+    <sourceObjectType>DataStreamTemplate</sourceObjectType>
+    <targetObject>SalesforceDotCom_AMGCRM</targetObject>
+</DataKitObjectDependency>
