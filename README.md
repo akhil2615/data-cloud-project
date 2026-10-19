@@ -3,6 +3,10 @@
 This repository is the shared record of what we build in the build sandbox,
 test in the deployment sandbox, and promote to production.
 
+A worked example of “kit retrieve vs object retrieve” is in
+[demo/git-demo-kit/README.md](demo/git-demo-kit/README.md). That demo uses the
+sandbox kit `GIT_Demo_Kit` (AMG CRM Account and Contact).
+
 You do not need to be a Git expert to use it. The process is:
 
 ```text
