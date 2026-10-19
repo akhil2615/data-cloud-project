@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataStreamTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <dataSourceBundleDefinition>amgcrm1</dataSourceBundleDefinition>
+    <dataSourceObject>Contact_AMGCRM3</dataSourceObject>
+    <fullRefreshIntervalDays>NONE</fullRefreshIntervalDays>
+    <masterLabel>Contact_AMGCRM</masterLabel>
+    <objectCategory>Salesforce_SFDCReferenceModel_0_93.Profile</objectCategory>
+    <refreshFrequency>BATCH</refreshFrequency>
+    <refreshMode>UPSERT</refreshMode>
+    <sourceObjectName>Contact_AMGCRM</sourceObjectName>
+    <streamType>INGEST</streamType>
+    <templateVersion>1</templateVersion>
+</DataStreamTemplate>
